@@ -28,9 +28,7 @@ class HTMLNode:
 
 class ParentNode(HTMLNode):
     def __init__(self, tag, children, props=None):
-        self.tag = tag
-        self.children = children
-        self.props = props
+        super().__init__(tag=tag, value=None, children=children, props=props)
 
     def to_html(self):
         if not self.tag:
@@ -39,10 +37,11 @@ class ParentNode(HTMLNode):
         if not self.children:
             raise ValueError("children are required for ParentNode")
 
-        buffer = f"<{self.tag}>"
+        buffer = f"<{self.tag}{self.props_to_html()}>"
 
         for child in self.children:
             buffer += child.to_html()
+            buffer += "\n"
 
         buffer += f"</{self.tag}>"
         return buffer
