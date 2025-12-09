@@ -116,7 +116,7 @@ class TestParentNode(unittest.TestCase):
         child1 = LeafNode("span", "c1")
         child2 = LeafNode("b", "c2")
         parent = ParentNode("div", [child1, child2])
-        self.assertEqual(parent.to_html(), "<div><span>c1</span>\n<b>c2</b>\n</div>")
+        self.assertEqual(parent.to_html(), "<div><span>c1</span><b>c2</b></div>")
 
     def test_to_html_with_mixed_leaf_and_parent_children(self):
         grandchild = LeafNode("em", "inner")
@@ -125,7 +125,7 @@ class TestParentNode(unittest.TestCase):
         parent = ParentNode("div", [child1, child2])
         self.assertEqual(
             parent.to_html(),
-            "<div><span><em>inner</em></span>\n<strong>text</strong>\n</div>",
+            "<div><span><em>inner</em></span><strong>text</strong></div>",
         )
 
     def test_to_html_with_props(self):
@@ -136,7 +136,7 @@ class TestParentNode(unittest.TestCase):
         self.assertTrue(html.startswith("<div "))
         self.assertIn('class="container"', html)
         self.assertIn('id="main"', html)
-        self.assertTrue(html.endswith("></div>") or html.endswith(">\n</div>"))
+        self.assertTrue(html.endswith("></div>") or html.endswith("></div>"))
         self.assertIn("<span>data</span>", html)
 
     def test_to_html_raises_error_no_tag(self):
