@@ -39,9 +39,10 @@ class ParentNode(HTMLNode):
 
         buffer = f"<{self.tag}{self.props_to_html()}>"
 
-        for child in self.children:
+        for i, child in enumerate(self.children):
             buffer += child.to_html()
-            buffer += "\n"
+            if len(self.children) > 1:
+                buffer += "\n"
 
         buffer += f"</{self.tag}>"
         return buffer
