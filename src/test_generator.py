@@ -58,7 +58,7 @@ class TestMarkdownToHTMLNode(unittest.TestCase):
             "<ul><li>first <i>item</i></li>"
             '<li>second with a <a href="url">link</a></li></ul>'
             "<ol><li>uno</li><li>dos</li></ol>"
-            "<blockquote><p>quoted line and <i>more</i> quote</p></blockquote>"
+            "<blockquote>quoted line and <i>more</i> quote</blockquote>"
             "</div>",
         )
 

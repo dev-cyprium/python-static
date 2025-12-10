@@ -121,7 +121,7 @@ def quote_to_html(block):
 
     text = " ".join(lines)
     children = _inline_children_from_text(text)
-    return ParentNode("blockquote", [ParentNode("p", children)])
+    return ParentNode("blockquote", children)
 
 
 def _list_items_to_html(lines):
