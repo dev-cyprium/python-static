@@ -1,5 +1,5 @@
 from textnode import TextNode, TextType
-from utils import split_nodes_delimiter, text_node_to_html_node
+from utils import extract_markdown_images, split_nodes_delimiter, text_node_to_html_node
 import unittest
 
 
@@ -237,6 +237,38 @@ class TestSplitNodesDelimiter(unittest.TestCase):
         ]
 
         self.assertEqual(new_nodes, expected)
+
+
+class TestExtractMarkdownImages(unittest.TestCase):
+    def test_single_image(self):
+        text = "This is an image ![alt text](image.png)"
+        expected = [("alt text", "image.png")]
+
+        self.assertEqual(extract_markdown_images(text), expected)
+
+    def test_multiple_images(self):
+        text = "One ![alt1](url1.png) and two ![alt2](url2.jpg)."
+        expected = [("alt1", "url1.png"), ("alt2", "url2.jpg")]
+
+        self.assertEqual(extract_markdown_images(text), expected)
+
+    def test_no_images(self):
+        text = "No images here!"
+        expected = []
+
+        self.assertEqual(extract_markdown_images(text), expected)
+
+    def test_image_with_brackets_and_parentheses(self):
+        text = "Edge ![a [b]](c(1).png) cases"
+        expected = [("a [b]", "c(1).png")]
+
+        self.assertEqual(extract_markdown_images(text), expected)
+
+    def test_image_with_empty_alt_and_url(self):
+        text = "![](a.png) and ![alt]() and ![]()"
+        expected = [("", "a.png"), ("alt", ""), ("", "")]
+
+        self.assertEqual(extract_markdown_images(text), expected)
 
 
 if __name__ == "__main__":
