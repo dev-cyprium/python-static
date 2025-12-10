@@ -34,8 +34,8 @@ def extract_markdown_images(text):
 
 
 def extract_markdown_links(text):
-    re_links = r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"
-    return re.findall(re_links, text)
+    pattern = r"(?<!\!)\[((?:[^\[\]]|\[[^\[\]]*\])*)\]\(((?:[^\(\)]|\([^\(\)]*\))*)\)"
+    return re.findall(pattern, text)
 
 
 def text_node_to_html_node(text_node):

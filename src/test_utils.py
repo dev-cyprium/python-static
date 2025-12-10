@@ -1,5 +1,10 @@
 from textnode import TextNode, TextType
-from utils import extract_markdown_images, split_nodes_delimiter, text_node_to_html_node
+from utils import (
+    extract_markdown_images,
+    extract_markdown_links,
+    split_nodes_delimiter,
+    text_node_to_html_node,
+)
 import unittest
 
 
@@ -269,6 +274,38 @@ class TestExtractMarkdownImages(unittest.TestCase):
         expected = [("", "a.png"), ("alt", ""), ("", "")]
 
         self.assertEqual(extract_markdown_images(text), expected)
+
+
+class TestExtractMarkdownLinks(unittest.TestCase):
+    def test_single_link(self):
+        text = "This is a [link text](http://example.com)"
+        expected = [("link text", "http://example.com")]
+        self.assertEqual(extract_markdown_links(text), expected)
+
+    def test_multiple_links(self):
+        text = "First [one](1.html), second [two](2.html)."
+        expected = [("one", "1.html"), ("two", "2.html")]
+        self.assertEqual(extract_markdown_links(text), expected)
+
+    def test_no_links(self):
+        text = "There are no links here!"
+        expected = []
+        self.assertEqual(extract_markdown_links(text), expected)
+
+    def test_ignores_images(self):
+        text = "This is not a link: ![image alt](img.png), but [yes](ok.html)."
+        expected = [("yes", "ok.html")]
+        self.assertEqual(extract_markdown_links(text), expected)
+
+    def test_link_with_brackets_and_parentheses(self):
+        text = "Edge [a [b]](c(1).html) cases"
+        expected = [("a [b]", "c(1).html")]
+        self.assertEqual(extract_markdown_links(text), expected)
+
+    def test_link_with_empty_text_and_url(self):
+        text = "Empty text: [](), valid: [abc](http://)"
+        expected = [("", ""), ("abc", "http://")]
+        self.assertEqual(extract_markdown_links(text), expected)
 
 
 if __name__ == "__main__":
