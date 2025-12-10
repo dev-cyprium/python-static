@@ -3,6 +3,7 @@ import os
 import shutil
 
 from file_manage import discover_files
+from generator import generate_page
 
 PUBLIC_PATH = "./public"
 
@@ -45,6 +46,9 @@ def main():
 
             if not args.dry_run:
                 shutil.copy2(path, dest_path)
+
+    print("📜 Generating pages...")
+    generate_page("./content/index.md", "template.html", "./public/index.html")
 
 
 if __name__ == "__main__":

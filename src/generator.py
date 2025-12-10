@@ -1,7 +1,40 @@
+import os
 from blocks import BlockType, block_to_block_type
 from htmlnode import HTMLNode, LeafNode, ParentNode
-from utils import markdown_to_blocks, text_node_to_html_node, text_to_textnodes
+from utils import (
+    extract_title,
+    markdown_to_blocks,
+    text_node_to_html_node,
+    text_to_textnodes,
+)
 import re
+
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"📜 Generating from {from_path} to {dest_path} using {template_path}")
+
+    md_content = None
+    tempalte_content = None
+    with open(from_path, "r") as f:
+        md_content = f.read()
+
+    with open(template_path, "r") as f:
+        tempalte_content = f.read()
+
+    node = markdown_to_html_node(md_content)
+    title = extract_title(md_content) or ""
+
+    template_content = tempalte_content.replace(
+        r"{{ Content }}", node.to_html()
+    ).replace(r"{{ Title }}", title)
+
+    dir = os.path.dirname(dest_path)
+
+    if dir:
+        os.makedirs(dir, exist_ok=True)
+
+    with open(dest_path, "w") as f:
+        f.write(template_content)
 
 
 def markdown_to_html_node(markdown) -> HTMLNode:

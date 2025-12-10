@@ -177,3 +177,14 @@ def text_node_to_html_node(text_node):
             return LeafNode(None, text_node.text)
         case _:
             raise ValueError(f"Unexpected TextType: {text_node.text_type}")
+
+            # INSERT_YOUR_CODE
+
+
+def extract_title(markdown):
+    lines = markdown.splitlines()
+    for line in lines:
+        match = re.match(r"^#\s+(.+)", line.strip())
+        if match:
+            return match.group(1).strip()
+    return None
