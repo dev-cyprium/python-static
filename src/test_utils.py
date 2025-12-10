@@ -3,7 +3,10 @@ from utils import (
     extract_markdown_images,
     extract_markdown_links,
     split_nodes_delimiter,
+    split_nodes_image,
+    split_nodes_link,
     text_node_to_html_node,
+    text_to_textnodes,
 )
 import unittest
 
@@ -306,6 +309,236 @@ class TestExtractMarkdownLinks(unittest.TestCase):
         text = "Empty text: [](), valid: [abc](http://)"
         expected = [("", ""), ("abc", "http://")]
         self.assertEqual(extract_markdown_links(text), expected)
+
+
+import unittest
+
+
+class TestSplitNodesImage(unittest.TestCase):
+    def test_single_image(self):
+        node = TextNode(
+            "A simple ![cat](cat.png) test.",
+            TextType.PLAIN,
+        )
+        result = split_nodes_image([node])
+        expected = [
+            TextNode("A simple ", TextType.PLAIN),
+            TextNode("cat", TextType.IMAGE, "cat.png"),
+            TextNode(" test.", TextType.PLAIN),
+        ]
+        self.assertEqual(result, expected)
+
+    def test_multiple_images(self):
+        node = TextNode(
+            "Here is ![one](1.png) and ![two](2.png).",
+            TextType.PLAIN,
+        )
+        result = split_nodes_image([node])
+        expected = [
+            TextNode("Here is ", TextType.PLAIN),
+            TextNode("one", TextType.IMAGE, "1.png"),
+            TextNode(" and ", TextType.PLAIN),
+            TextNode("two", TextType.IMAGE, "2.png"),
+            TextNode(".", TextType.PLAIN),
+        ]
+        self.assertEqual(result, expected)
+
+    def test_image_with_text_before_and_after(self):
+        node = TextNode(
+            "Start ![pic](image.jpg) end",
+            TextType.PLAIN,
+        )
+        result = split_nodes_image([node])
+        expected = [
+            TextNode("Start ", TextType.PLAIN),
+            TextNode("pic", TextType.IMAGE, "image.jpg"),
+            TextNode(" end", TextType.PLAIN),
+        ]
+        self.assertEqual(result, expected)
+
+    def test_no_image_returns_same_node(self):
+        node = TextNode("Just plain text.", TextType.PLAIN)
+        result = split_nodes_image([node])
+        self.assertEqual(result, [node])
+
+    def test_non_plain_node_unchanged(self):
+        node = TextNode("alt text", TextType.IMAGE, "url.png")
+        result = split_nodes_image([node])
+        self.assertEqual(result, [node])
+
+    def test_image_at_start_and_end(self):
+        node = TextNode("![start](s.png) in the middle ![end](e.png)", TextType.PLAIN)
+        result = split_nodes_image([node])
+        expected = [
+            TextNode("start", TextType.IMAGE, "s.png"),
+            TextNode(" in the middle ", TextType.PLAIN),
+            TextNode("end", TextType.IMAGE, "e.png"),
+        ]
+        self.assertEqual(result, expected)
+
+    def test_empty_string(self):
+        node = TextNode("", TextType.PLAIN)
+        result = split_nodes_image([node])
+        self.assertEqual(result, [node])
+
+
+class TestSplitNodesLink(unittest.TestCase):
+    def test_single_link(self):
+        node = TextNode(
+            "Visit [OpenAI](https://openai.com) here.",
+            TextType.PLAIN,
+        )
+        result = split_nodes_link([node])
+        expected = [
+            TextNode("Visit ", TextType.PLAIN),
+            TextNode("OpenAI", TextType.LINK, "https://openai.com"),
+            TextNode(" here.", TextType.PLAIN),
+        ]
+        self.assertEqual(result, expected)
+
+    def test_multiple_links(self):
+        node = TextNode(
+            "[One](1.html), [Two](2.html)",
+            TextType.PLAIN,
+        )
+        result = split_nodes_link([node])
+        expected = [
+            TextNode("One", TextType.LINK, "1.html"),
+            TextNode(", ", TextType.PLAIN),
+            TextNode("Two", TextType.LINK, "2.html"),
+        ]
+        self.assertEqual(result, expected)
+
+    def test_link_with_text_before_after(self):
+        node = TextNode(
+            "Prefix [linked](url) suffix",
+            TextType.PLAIN,
+        )
+        result = split_nodes_link([node])
+        expected = [
+            TextNode("Prefix ", TextType.PLAIN),
+            TextNode("linked", TextType.LINK, "url"),
+            TextNode(" suffix", TextType.PLAIN),
+        ]
+        self.assertEqual(result, expected)
+
+    def test_no_link_returns_same_node(self):
+        node = TextNode("plain with no link", TextType.PLAIN)
+        result = split_nodes_link([node])
+        self.assertEqual(result, [node])
+
+    def test_non_plain_node_unchanged(self):
+        node = TextNode("click me", TextType.LINK, "url")
+        result = split_nodes_link([node])
+        self.assertEqual(result, [node])
+
+    def test_link_and_image(self):
+        node = TextNode(
+            "A link: [foo](bar.html) and an image: ![x](y.png)", TextType.PLAIN
+        )
+        result = split_nodes_link([node])
+        expected = [
+            TextNode("A link: ", TextType.PLAIN),
+            TextNode("foo", TextType.LINK, "bar.html"),
+            TextNode(" and an image: ![x](y.png)", TextType.PLAIN),
+        ]
+        self.assertEqual(result, expected)
+
+    def test_link_at_start_and_end(self):
+        node = TextNode("[start](s) middle [end](e)", TextType.PLAIN)
+        result = split_nodes_link([node])
+        expected = [
+            TextNode("start", TextType.LINK, "s"),
+            TextNode(" middle ", TextType.PLAIN),
+            TextNode("end", TextType.LINK, "e"),
+        ]
+        self.assertEqual(result, expected)
+
+    def test_empty_string(self):
+        node = TextNode("", TextType.PLAIN)
+        result = split_nodes_link([node])
+        self.assertEqual(result, [node])
+
+
+class TestTextToTextNodes(unittest.TestCase):
+    def test_plain_text_node(self):
+        text = "This is just plain text."
+        nodes = text_to_textnodes(text)
+        expected = [TextNode("This is just plain text.", TextType.PLAIN)]
+        self.assertEqual(nodes, expected)
+
+    def test_text_with_image(self):
+        text = "Text with ![kitty](cat.png) inline."
+        nodes = text_to_textnodes(text)
+        expected = [
+            TextNode("Text with ", TextType.PLAIN),
+            TextNode("kitty", TextType.IMAGE, "cat.png"),
+            TextNode(" inline.", TextType.PLAIN),
+        ]
+        self.assertEqual(nodes, expected)
+
+    def test_text_with_link(self):
+        text = "Here is a [website](https://example.com)."
+        nodes = text_to_textnodes(text)
+        expected = [
+            TextNode("Here is a ", TextType.PLAIN),
+            TextNode("website", TextType.LINK, "https://example.com"),
+            TextNode(".", TextType.PLAIN),
+        ]
+        self.assertEqual(nodes, expected)
+
+    def test_text_with_bold_and_italic_and_code(self):
+        text = "It is *italic*, **bold**, and `code`."
+        nodes = text_to_textnodes(text)
+        expected = [
+            TextNode("It is ", TextType.PLAIN),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(", ", TextType.PLAIN),
+            TextNode("bold", TextType.BOLD),
+            TextNode(", and ", TextType.PLAIN),
+            TextNode("code", TextType.CODE),
+            TextNode(".", TextType.PLAIN),
+        ]
+        self.assertEqual(nodes, expected)
+
+    def test_text_with_multiple_features(self):
+        text = "See ![img](u.png), *em*, [l](u), and `c`."
+        nodes = text_to_textnodes(text)
+        expected = [
+            TextNode("See ", TextType.PLAIN),
+            TextNode("img", TextType.IMAGE, "u.png"),
+            TextNode(", ", TextType.PLAIN),
+            TextNode("em", TextType.ITALIC),
+            TextNode(", ", TextType.PLAIN),
+            TextNode("l", TextType.LINK, "u"),
+            TextNode(", and ", TextType.PLAIN),
+            TextNode("c", TextType.CODE),
+            TextNode(".", TextType.PLAIN),
+        ]
+        self.assertEqual(nodes, expected)
+
+    def test_empty_string(self):
+        text = ""
+        nodes = text_to_textnodes(text)
+        expected = []
+        self.assertEqual(nodes, expected)
+
+    def test_removes_empty_nodes_from_split(self):
+        text = "Here is `code` and plain"
+        nodes = text_to_textnodes(text)
+        # No empty text nodes should be present
+        for n in nodes:
+            self.assertNotEqual(n.text, "")
+
+    def test_text_with_underscore_italic(self):
+        text = "This _is_ important"
+        nodes = text_to_textnodes(text)
+        expected = [
+            TextNode("This ", TextType.PLAIN),
+            TextNode("is", TextType.ITALIC),
+            TextNode(" important", TextType.PLAIN),
+        ]
+        self.assertEqual(nodes, expected)
 
 
 if __name__ == "__main__":
