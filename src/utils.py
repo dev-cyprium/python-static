@@ -3,6 +3,19 @@ from textnode import TextType, TextNode
 from htmlnode import LeafNode
 
 
+def markdown_to_blocks(markdown):
+    markdown = markdown.strip()
+    raw_blocks = re.split(r"(?:\r?\n){2,}", markdown)
+    blocks = []
+    for block in raw_blocks:
+        lines = block.splitlines()
+        stripped_lines = [line.strip() for line in lines]
+        stripped_lines = [line for line in stripped_lines if line != ""]
+        if stripped_lines:
+            blocks.append("\n".join(stripped_lines))
+    return blocks
+
+
 def text_to_textnodes(text):
     nodes = [TextNode(text, TextType.PLAIN)]
 
