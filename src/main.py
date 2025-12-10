@@ -3,7 +3,7 @@ import os
 import shutil
 
 from file_manage import discover_files
-from generator import generate_page
+from generator import generate_pages_recursive
 
 PUBLIC_PATH = "./public"
 
@@ -48,23 +48,8 @@ def main():
                 shutil.copy2(path, dest_path)
 
     print("📜 Generating pages...")
-    generate_page("./content/index.md", "template.html", "./public/index.html")
-    generate_page(
-        "./content/contact/index.md", "template.html", "./public/contact/index.html"
-    )
-    generate_page(
-        "./content/blog/glorfindel/index.md",
-        "template.html",
-        "./public/blog/glorfindel/index.html",
-    )
-    generate_page(
-        "./content/blog/tom/index.md", "template.html", "./public/blog/tom/index.html"
-    )
-    generate_page(
-        "./content/blog/majesty/index.md",
-        "template.html",
-        "./public/blog/majesty/index.html",
-    )
+    if not args.dry_run:
+        generate_pages_recursive("./content", "template.html", "./public")
 
 
 if __name__ == "__main__":
