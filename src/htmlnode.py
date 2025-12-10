@@ -34,7 +34,7 @@ class ParentNode(HTMLNode):
         if not self.tag:
             raise ValueError("tag is required for ParentNode")
 
-        if not self.children:
+        if self.children is None:
             raise ValueError("children are required for ParentNode")
 
         buffer = f"<{self.tag}{self.props_to_html()}>"

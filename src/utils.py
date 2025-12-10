@@ -11,7 +11,16 @@ def markdown_to_blocks(markdown):
         lines = block.splitlines()
         stripped_lines = [line.strip() for line in lines]
         stripped_lines = [line for line in stripped_lines if line != ""]
-        if stripped_lines:
+
+        if not stripped_lines:
+            continue
+
+        is_unordered = all(line.startswith("- ") for line in stripped_lines)
+        is_ordered = all(re.match(r"^\d+\. ", line) for line in stripped_lines)
+
+        if is_unordered or is_ordered:
+            blocks.append("\n".join(stripped_lines))
+        else:
             blocks.append("\n".join(stripped_lines))
     return blocks
 

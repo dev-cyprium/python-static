@@ -150,11 +150,6 @@ class TestParentNode(unittest.TestCase):
         with self.assertRaises(ValueError):
             parent.to_html()
 
-    def test_to_html_raises_error_empty_children(self):
-        parent = ParentNode("div", [])
-        with self.assertRaises(ValueError):
-            parent.to_html()
-
     def test_repr(self):
         children = [LeafNode("span", "child")]
         node = ParentNode("div", children, {"data": "val"})
